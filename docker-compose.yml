@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  controller:
+    build:
+      context: ./ansible
+    container_name: ansible-controller
+    volumes:
+      - ./ansible:/ansible
+    depends_on:
+      - node1
+      - node2
+    networks:
+      - ansible-net
+
+  node1:
+    build:
+      context: ./node
+    container_name: node1
+    hostname: node1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ansible-net
+
+  node2:
+    build:
+      context: ./node
+    container_name: node2
+    hostname: node2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ansible-net
+
+networks:
+  ansible-net:
+    driver: bridge

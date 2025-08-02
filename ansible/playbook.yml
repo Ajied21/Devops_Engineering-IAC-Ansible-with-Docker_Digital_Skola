@@ -1,0 +1,32 @@
+- name: Jalankan NGINX berbeda di setiap node
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Install Python pip dan dependencies Docker SDK
+      apt:
+        name:
+          - python3-pip
+          - python3-setuptools
+        state: present
+        update_cache: yes
+
+    - name: Install Python requests dan Docker SDK
+      pip:
+        name:
+          - requests
+          - docker
+        executable: pip3
+
+    - name: Tentukan port berdasarkan node
+      set_fact:
+        nginx_port: "{{ '8081' if inventory_hostname == 'node1' else '8082' }}"
+
+    - name: Jalankan container nginx (nama sesuai hostname)
+      docker_container:
+        name: "nginx-{{ inventory_hostname }}"
+        image: nginx
+        state: started
+        recreate: yes
+        force_kill: yes
+        ports:
+          - "{{ nginx_port }}:80"
